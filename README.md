@@ -2,7 +2,11 @@
 
 Keep your Mac wide awake — so you can close the lid, drop it in your bag, and walk away while it keeps running (downloads, builds, servers, syncs, you name it).
 
+<img width="839" height="304" alt="Screenshot 2026-05-30 at 2 49 44 PM" src="https://github.com/user-attachments/assets/269071d1-d1de-4059-b61d-bba36e56480f" />
+
+
 `guarana` runs [`caffeinate`](https://ss64.com/mac/caffeinate.html) and disables lid sleep via `pmset`, so your machine won't sleep even with the lid shut. One command to start, one to stop.
+
 
 ```
 guarana          # stay awake — safe to close the lid and bag it

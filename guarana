@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+#
+# Guarana — keep your Mac awake so you can bag your laptop with the lid closed.
+#
+#   guarana            Start: caffeinate (no sleep/display/idle) + disable lid sleep
+#   guarana --kill     Stop:  kill caffeinate + re-enable lid sleep
+#   guarana -k         Alias for --kill
+#   guarana --help     Show usage
+#
+# https://github.com/mrsladoje/guarana
+
+set -uo pipefail
+
+VERSION="1.0.0"
+
+# ── colors ──────────────────────────────────────────────────────────────────
+R=$'\033[0m'
+W=$'\033[1;37m'
+Y=$'\033[1;33m'
+GR=$'\033[1;32m'
+RD=$'\033[1;31m'
+RB=$'\033[1;37;41m'
+
+guarana_require_macos() {
+  if [[ "$(uname -s)" != "Darwin" ]] || ! command -v caffeinate >/dev/null 2>&1; then
+    echo "${RD}guarana only works on macOS — it relies on 'caffeinate' and 'pmset'.${R}" >&2
+    exit 1
+  fi
+}
+
+guarana_usage() {
+  cat <<EOF
+guarana ${VERSION} — keep your Mac awake.
+
+Usage:
+  guarana            Start: keep the Mac awake and disable lid sleep
+  guarana --kill     Stop:  re-enable normal sleep (alias: -k)
+  guarana --help     Show this help (alias: -h)
+EOF
+}
+
+guarana_kill() {
+  if killall caffeinate 2>/dev/null; then
+    echo "${GR}Caffeinate stopped.${R}"
+  else
+    echo "${Y}No caffeinate running.${R}"
+  fi
+  sudo pmset -b disablesleep 0 2>/dev/null
+  sudo pmset -c disablesleep 0 2>/dev/null
+  echo "${GR}Lid sleep re-enabled.${R}"
+}
+
+guarana_start() {
+  # Clear any caffeinate already running so we never stack them.
+  killall caffeinate 2>/dev/null
+
+  echo ""
+  echo "          ${W}▄█▄  ▄█▄${R}"
+  echo "         ${W}████  ████${R}"
+  echo "        ${W}████████████${R}"
+  echo "       ${W}███████████████${R}"
+  echo "       ${W}██ ${Y}▄▄▄${W}   ${Y}▄▄▄${W} ██${R}"
+  echo "       ${W}██ ${Y}███${W} ▲ ${Y}███${W} ██${R}"
+  echo "       ${W}██ ${Y}▀▀▀${W}   ${Y}▀▀▀${W} ██${R}"
+  echo "       ${W}███████████████${R}"
+  echo "        ${W}█████████████${R}"
+  echo "         ${W}███████████${R}"
+  echo "         ${W}██ ████ ██${R}"
+  echo "        ${W}█████████████${R}"
+  echo ""
+  echo "  ${W}██████╗ ██╗   ██╗ █████╗ ██████╗  █████╗ ███╗  ██╗ █████╗${R}"
+  echo "  ${W}██╔════╝██║   ██║██╔══██╗██╔══██╗██╔══██╗████╗ ██║██╔══██╗${R}"
+  echo "  ${W}██║  ███╗██║   ██║███████║██████╔╝███████║██╔██╗██║███████║${R}"
+  echo "  ${W}██║   ██║██║   ██║██╔══██║██╔══██╗██╔══██║██║╚████║██╔══██║${R}"
+  echo "  ${W}╚██████╔╝╚██████╔╝██║  ██║██║  ██║██║  ██║██║ ╚███║██║  ██║${R}"
+  echo "  ${W} ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚══╝╚═╝  ╚═╝${R}"
+  echo ""
+  echo "  ${RB}  ███╗  ██╗ ██████╗      ███████╗██╗     ███████╗███████╗██████╗   ${R}"
+  echo "  ${RB}  ████╗ ██║██╔═══██╗     ██╔════╝██║     ██╔════╝██╔════╝██╔══██╗  ${R}"
+  echo "  ${RB}  ██╔██╗██║██║   ██║     ███████╗██║     █████╗  █████╗  ██████╔╝  ${R}"
+  echo "  ${RB}  ██║╚████║██║   ██║     ╚════██║██║     ██╔══╝  ██╔══╝  ██╔═══╝   ${R}"
+  echo "  ${RB}  ██║ ╚███║╚██████╔╝     ███████║███████╗███████╗███████╗██║        ${R}"
+  echo "  ${RB}  ╚═╝  ╚══╝ ╚═════╝      ╚══════╝╚══════╝╚══════╝╚══════╝╚═╝        ${R}"
+  echo ""
+
+  # Detach caffeinate so it survives this command exiting and closing the terminal.
+  nohup caffeinate -dis >/dev/null 2>&1 &
+  local pid=$!
+
+  sudo pmset -b disablesleep 1 2>/dev/null
+  sudo pmset -c disablesleep 1 2>/dev/null
+
+  echo "  ${GR}✓ Caffeinate active (PID: ${pid}) — your Mac will not sleep.${R}"
+  echo "  ${GR}✓ Lid sleep disabled — safe to close the lid and bag it.${R}"
+  echo "  ${W}  Run 'guarana --kill' to stop.${R}"
+  echo ""
+}
+
+case "${1:-}" in
+  --kill|-k)
+    guarana_require_macos
+    guarana_kill
+    ;;
+  --help|-h)
+    guarana_usage
+    ;;
+  "")
+    guarana_require_macos
+    guarana_start
+    ;;
+  *)
+    echo "${RD}Unknown option: $1${R}" >&2
+    echo "" >&2
+    guarana_usage >&2
+    exit 1
+    ;;
+esac

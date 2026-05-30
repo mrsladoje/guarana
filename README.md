@@ -38,15 +38,18 @@ cd guarana
 
 ## Usage
 
-| Command           | What it does                                                              |
-| ----------------- | ------------------------------------------------------------------------- |
-| `guarana`         | Keeps the Mac awake (`caffeinate -dis`) **and** disables lid sleep.       |
-| `guarana --kill`  | Stops caffeinate and re-enables normal lid sleep. (alias: `-k`)           |
-| `guarana --help`  | Show usage. (alias: `-h`)                                                 |
+| Command           | What it does                                                                      |
+| ----------------- | --------------------------------------------------------------------------------- |
+| `guarana`         | Keeps the Mac awake (`caffeinate -dis`) **and** disables lid sleep.               |
+| `guarana --nolid` | Keeps the Mac awake but leaves lid sleep **on** — no `sudo` needed. (alias: `-n`) |
+| `guarana --kill`  | Stops caffeinate and re-enables normal lid sleep. (alias: `-k`)                   |
+| `guarana --help`  | Show usage. (alias: `-h`)                                                          |
 
 `caffeinate` is started detached, so it keeps running after you close the terminal — close the lid and bag it. `guarana --kill` cleans everything back up.
 
-> **Note:** disabling lid sleep uses `pmset`, which needs admin rights, so `guarana` will ask for your password (via `sudo`). Nothing else leaves your machine.
+Use **`--nolid`** when you just want the Mac to stay awake while you're using it (or on an external display) and you're fine with it sleeping when the lid closes. It skips `pmset`, so it won't ask for your password.
+
+> **Note:** disabling lid sleep uses `pmset`, which needs admin rights, so plain `guarana` will ask for your password (via `sudo`). `guarana --nolid` skips that. Nothing else leaves your machine.
 
 ## Uninstall
 

@@ -34,6 +34,7 @@ guarana ${VERSION} — keep your Mac awake.
 
 Usage:
   guarana            Start: keep the Mac awake and disable lid sleep
+  guarana --nolid    Start: keep the Mac awake but leave lid sleep ON (no sudo) (alias: -n)
   guarana --kill     Stop:  re-enable normal sleep (alias: -k)
   guarana --help     Show this help (alias: -h)
 EOF
@@ -51,47 +52,40 @@ guarana_kill() {
 }
 
 guarana_start() {
+  # Pass "nolid" to keep the Mac awake without disabling lid sleep (no sudo).
+  local block_lid=1
+  [[ "${1:-}" == "nolid" ]] && block_lid=0
+
   # Clear any caffeinate already running so we never stack them.
   killall caffeinate 2>/dev/null
 
   echo ""
-  echo "          ${W}▄█▄  ▄█▄${R}"
-  echo "         ${W}████  ████${R}"
-  echo "        ${W}████████████${R}"
-  echo "       ${W}███████████████${R}"
-  echo "       ${W}██ ${Y}▄▄▄${W}   ${Y}▄▄▄${W} ██${R}"
-  echo "       ${W}██ ${Y}███${W} ▲ ${Y}███${W} ██${R}"
-  echo "       ${W}██ ${Y}▀▀▀${W}   ${Y}▀▀▀${W} ██${R}"
-  echo "       ${W}███████████████${R}"
-  echo "        ${W}█████████████${R}"
-  echo "         ${W}███████████${R}"
-  echo "         ${W}██ ████ ██${R}"
-  echo "        ${W}█████████████${R}"
-  echo ""
-  echo "  ${W}██████╗ ██╗   ██╗ █████╗ ██████╗  █████╗ ███╗  ██╗ █████╗${R}"
-  echo "  ${W}██╔════╝██║   ██║██╔══██╗██╔══██╗██╔══██╗████╗ ██║██╔══██╗${R}"
-  echo "  ${W}██║  ███╗██║   ██║███████║██████╔╝███████║██╔██╗██║███████║${R}"
-  echo "  ${W}██║   ██║██║   ██║██╔══██║██╔══██╗██╔══██║██║╚████║██╔══██║${R}"
-  echo "  ${W}╚██████╔╝╚██████╔╝██║  ██║██║  ██║██║  ██║██║ ╚███║██║  ██║${R}"
-  echo "  ${W} ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚══╝╚═╝  ╚═╝${R}"
-  echo ""
-  echo "  ${RB}  ███╗  ██╗ ██████╗      ███████╗██╗     ███████╗███████╗██████╗   ${R}"
-  echo "  ${RB}  ████╗ ██║██╔═══██╗     ██╔════╝██║     ██╔════╝██╔════╝██╔══██╗  ${R}"
-  echo "  ${RB}  ██╔██╗██║██║   ██║     ███████╗██║     █████╗  █████╗  ██████╔╝  ${R}"
-  echo "  ${RB}  ██║╚████║██║   ██║     ╚════██║██║     ██╔══╝  ██╔══╝  ██╔═══╝   ${R}"
-  echo "  ${RB}  ██║ ╚███║╚██████╔╝     ███████║███████╗███████╗███████╗██║        ${R}"
-  echo "  ${RB}  ╚═╝  ╚══╝ ╚═════╝      ╚══════╝╚══════╝╚══════╝╚══════╝╚═╝        ${R}"
+  echo "          ${W}▄█▄  ▄█▄${R}          ${W}██████╗ ██╗   ██╗ █████╗ ██████╗  █████╗ ███╗  ██╗ █████╗${R}"
+  echo "         ${W}████  ████${R}         ${W}██╔════╝██║   ██║██╔══██╗██╔══██╗██╔══██╗████╗ ██║██╔══██╗${R}"
+  echo "        ${W}████████████${R}        ${W}██║  ███╗██║   ██║███████║██████╔╝███████║██╔██╗██║███████║${R}"
+  echo "       ${W}███████████████${R}      ${W}██║   ██║██║   ██║██╔══██║██╔══██╗██╔══██║██║╚████║██╔══██║${R}"
+  echo "       ${W}██ ${Y}▄▄▄${W}   ${Y}▄▄▄${W} ██${R}      ${W}╚██████╔╝╚██████╔╝██║  ██║██║  ██║██║  ██║██║ ╚███║██║  ██║${R}"
+  echo "       ${W}██ ${Y}███${W} ▲ ${Y}███${W} ██${R}      ${W} ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚══╝╚═╝  ╚═╝${R}"
+  echo "       ${W}██ ${Y}▀▀▀${W}   ${Y}▀▀▀${W} ██${R}      ${RB}  ███╗  ██╗ ██████╗      ███████╗██╗     ███████╗███████╗██████╗   ${R}"
+  echo "       ${W}███████████████${R}      ${RB}  ████╗ ██║██╔═══██╗     ██╔════╝██║     ██╔════╝██╔════╝██╔══██╗  ${R}"
+  echo "        ${W}█████████████${R}       ${RB}  ██╔██╗██║██║   ██║     ███████╗██║     █████╗  █████╗  ██████╔╝  ${R}"
+  echo "         ${W}███████████${R}        ${RB}  ██║╚████║██║   ██║     ╚════██║██║     ██╔══╝  ██╔══╝  ██╔═══╝   ${R}"
+  echo "         ${W}██ ████ ██${R}         ${RB}  ██║ ╚███║╚██████╔╝     ███████║███████╗███████╗███████╗██║        ${R}"
+  echo "        ${W}█████████████${R}       ${RB}  ╚═╝  ╚══╝ ╚═════╝      ╚══════╝╚══════╝╚══════╝╚══════╝╚═╝        ${R}"
   echo ""
 
   # Detach caffeinate so it survives this command exiting and closing the terminal.
   nohup caffeinate -dis >/dev/null 2>&1 &
   local pid=$!
 
-  sudo pmset -b disablesleep 1 2>/dev/null
-  sudo pmset -c disablesleep 1 2>/dev/null
-
   echo "  ${GR}✓ Caffeinate active (PID: ${pid}) — your Mac will not sleep.${R}"
-  echo "  ${GR}✓ Lid sleep disabled — safe to close the lid and bag it.${R}"
+  if [[ $block_lid -eq 1 ]]; then
+    sudo pmset -b disablesleep 1 2>/dev/null
+    sudo pmset -c disablesleep 1 2>/dev/null
+    echo "  ${GR}✓ Lid sleep disabled — safe to close the lid and bag it.${R}"
+  else
+    echo "  ${Y}✓ Lid sleep left ON — close the lid and it will still sleep (no sudo).${R}"
+  fi
   echo "  ${W}  Run 'guarana --kill' to stop.${R}"
   echo ""
 }
@@ -100,6 +94,10 @@ case "${1:-}" in
   --kill|-k)
     guarana_require_macos
     guarana_kill
+    ;;
+  --nolid|-n)
+    guarana_require_macos
+    guarana_start nolid
     ;;
   --help|-h)
     guarana_usage
